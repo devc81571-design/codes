@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Class Management System</title>
+<style>
+/* ===== RESET & BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4ff;color:#1a1a2e;min-height:100vh}
+
+/* ===== UTILITIES ===== */
+.hidden{display:none!important}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(74,134,232,.12);padding:24px;margin-bottom:20px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-green{background:#e6f9ee;color:#1a7a42}
+.badge-red{background:#fde8e8;color:#c0392b}
+.badge-orange{background:#fff3e0;color:#e65100}
+.badge-blue{background:#e3f0ff;color:#1a5bb5}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;text-decoration:none}
+.btn-primary{background:#4a86e8;color:#fff}
+.btn-primary:hover{background:#2d6fd4}
+.btn-success{background:#27ae60;color:#fff}
+.btn-success:hover{background:#1e8c4e}
+.btn-danger{background:#e74c3c;color:#fff}
+.btn-danger:hover{background:#c0392b}
+.btn-outline{background:transparent;border:2px solid #4a86e8;color:#4a86e8}
+.btn-outline:hover{background:#4a86e8;color:#fff}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-block{width:100%;justify-content:center}
+input,select,textarea{width:100%;padding:11px 14px;border:1.5px solid #dde3f0;border-radius:10px;font-size:14px;margin-top:6px;outline:none;transition:border .2s;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:#4a86e8;box-shadow:0 0 0 3px rgba(74,134,232,.15)}
+label{font-size:13px;font-weight:600;color:#555;margin-top:12px;display:block}
+.form-group{margin-bottom:16px}
+
+/* ===== ALERT ===== */
+.alert{padding:12px 16px;border-radius:10px;margin:12px 0;font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px}
+.alert-success{background:#e6f9ee;color:#1a7a42;border:1.5px solid #b2dfcc}
+.alert-error{background:#fde8e8;color:#c0392b;border:1.5px solid #f5b8b8}
+.alert-info{background:#e3f0ff;color:#1a5bb5;border:1.5px solid #b3d1f7}
+.alert-warning{background:#fff3e0;color:#e65100;border:1.5px solid #ffcc80}
+
+/* ===== NAV ===== */
+.navbar{background:linear-gradient(135deg,#4a86e8,#2d6fd4);padding:14px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(74,134,232,.3);position:sticky;top:0;z-index:100}
+.navbar-brand{font-size:18px;font-weight:700;letter-spacing:.3px}
+.navbar-user{font-size:13px;opacity:.9;text-align:right}
+.navbar-user small{display:block;opacity:.75;font-size:11px}
+
+/* ===== LOGIN ===== */
+#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-card{background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(74,134,232,.18);padding:40px 36px;width:100%;max-width:420px}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .icon{font-size:56px;margin-bottom:8px}
+.login-logo h1{font-size:22px;color:#1a1a2e;font-weight:700}
+.login-logo p{color:#888;font-size:13px;margin-top:4px}
+
+/* ===== DASHBOARD ===== */
+#dashboard-page{padding:20px;max-width:1100px;margin:0 auto}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:14px;padding:20px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.07);border-top:4px solid #4a86e8}
+.stat-card.green{border-color:#27ae60}
+.stat-card.orange{border-color:#f39c12}
+.stat-card.red{border-color:#e74c3c}
+.stat-num{font-size:28px;font-weight:700;color:#1a1a2e;margin-bottom:4px}
+.stat-label{font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+/* ===== TABS ===== */
+.tab-bar{display:flex;gap:4px;background:#e8edf8;padding:5px;border-radius:12px;margin-bottom:20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab-btn{flex:none;padding:9px 18px;border-radius:9px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#666;white-space:nowrap;transition:all .2s}
+.tab-btn.active{background:#fff;color:#4a86e8;box-shadow:0 1px 6px rgba(74,134,232,.2)}
+
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1.5px solid #e8edf8}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#4a86e8;color:#fff;padding:12px 14px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid #f0f4ff;vertical-align:middle}
+tr:hover td{background:#f7f9ff}
+.pct-bar{height:8px;background:#eee;border-radius:4px;margin-top:4px}
+.pct-fill{height:100%;border-radius:4px;transition:width .4s}
+
+/* ===== LOADER ===== */
+.loader{display:flex;align-items:center;justify-content:center;padding:40px;flex-direction:column;gap:12px;color:#888}
+.spinner{width:36px;height:36px;border:4px solid #e3eafc;border-top:4px solid #4a86e8;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:18px;padding:28px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h3{font-size:18px;font-weight:700}
+.modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:#aaa;padding:0 4px}
+.modal-close:hover{color:#e74c3c}
+
+/* ===== TIMETABLE ===== */
+.tt-day{background:#fff;border-radius:12px;overflow:hidden;margin-bottom:12px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.tt-day-header{background:#4a86e8;color:#fff;padding:10px 16px;font-weight:700;font-size:14px}
+.tt-periods{padding:10px}
+.tt-period{padding:8px 12px;margin:4px 0;background:#f0f4ff;border-radius:8px;font-size:13px;border-left:4px solid #4a86e8}
+
+/* ===== ATTENDANCE EDIT ===== */
+.att-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #f0f4ff}
+.att-row:last-child{border:none}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+  .login-card{padding:28px 20px}
+  #dashboard-page{padding:12px}
+  .stat-num{font-size:22px}
+  .tab-btn{padding:8px 13px;font-size:12px}
+  th,td{padding:9px 10px;font-size:12px}
+  .modal{padding:20px 16px}
+  .btn{padding:9px 16px;font-size:13px}
+}
+@media(min-width:768px){
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">🎓</div>
+      <h1>Class Management System</h1>
+      <p>Login with your Enrollment Number</p>
+    </div>
+    <div id="login-alert"></div>
+    <div class="form-group">
+      <label>Enrollment Number</label>
+      <input type="text" id="enrollment-input" placeholder="e.g. 2024CS001" autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label>Password <small style="color:#aaa;font-weight:400">(Last 4 digits of enrollment)</small></label>
+      <input type="password" id="password-input" placeholder="Enter last 4 digits" autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="doLogin()" id="login-btn" style="margin-top:8px">
+      🔐 Login
+    </button>
+    <p style="text-align:center;margin-top:16px;font-size:12px;color:#aaa">
+      Password = Last 4 digits of your Enrollment Number
+    </p>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD PAGE ===== -->
+<div id="dashboard-page" class="hidden">
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-brand">🎓 CMS</div>
+    <div class="navbar-user">
+      <span id="nav-name">User</span>
+      <small id="nav-role">Role</small>
+    </div>
+    <button class="btn btn-outline" style="color:#fff;border-color:#fff;padding:7px 14px;font-size:12px" onclick="doLogout()">Logout</button>
+  </div>
+
+  <div style="max-width:1100px;margin:0 auto;padding:20px">
+    <!-- Welcome -->
+    <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,#4a86e8,#2d6fd4);color:#fff;border-radius:16px">
+      <h2 id="welcome-text" style="font-size:20px;font-weight:700"></h2>
+      <p id="welcome-sub" style="opacity:.85;font-size:13px;margin-top:4px"></p>
+    </div>
+
+    <!-- STUDENT VIEW -->
+    <div id="student-view" class="hidden">
+      <!-- Stats -->
+      <div class="stat-grid" id="student-stats"></div>
+      <!-- Tabs -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="showTab('att-tab')">📊 Attendance</button>
+        <button class="tab-btn" onclick="showTab('tt-tab')">📅 Timetable</button>
+        <button class="tab-btn" onclick="showTab('materials-tab')">📚 Materials</button>
+        <button class="tab-btn" onclick="showTab('upload-doc-tab')">📤 Upload Doc</button>
+        <button class="tab-btn" onclick="showTab('cgpa-tab')">🎯 CGPA</button>
+      </div>
+
+      <div id="att-tab" class="tab-content card"></div>
+      <div id="tt-tab" class="tab-content card hidden"></div>
+      <div id="materials-tab" class="tab-content card hidden"></div>
+      <div id="upload-doc-tab" class="tab-content card hidden"></div>
+      <div id="cgpa-tab" class="tab-content card hidden"></div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="admin-view" class="hidden">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="showTab('students-tab')">👥 Students</button>
+        <button class="tab-btn" onclick="showTab('attendance-tab')">📊 Attendance</button>
+        <button class="tab-btn" onclick="showTab('documents-tab')">📁 Documents</button>
+        <button class="tab-btn" onclick="showTab('upload-material-tab')">📤 Materials</button>
+        <button class="tab-btn" onclick="showTab('results-tab')">🎯 CGPA</button>
+      </div>
+
+      <div id="students-tab" class="tab-content card"></div>
+      <div id="attendance-tab" class="tab-content card hidden"></div>
+      <div id="documents-tab" class="tab-content card hidden"></div>
+      <div id="upload-material-tab" class="tab-content card hidden"></div>
+      <div id="results-tab" class="tab-content card hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Modal</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+var APP = { user: null };
+
+// ============================================================
+// HELPERS
+// ============================================================
+function showAlert(containerId, msg, type) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  var icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+  el.innerHTML = '<div class="alert alert-'+type+'">' + (icons[type]||'') + ' ' + msg + '</div>';
+}
+
+function clearAlert(id) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = '';
+}
+
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+function loader(id, msg) {
+  document.getElementById(id).innerHTML = '<div class="loader"><div class="spinner"></div><span>' + (msg||'Loading...') + '</span></div>';
+}
+
+function getPctClass(pct) {
+  if (pct >= 75) return 'badge-green';
+  if (pct >= 60) return 'badge-orange';
+  return 'badge-red';
+}
+
+function getPctColor(pct) {
+  if (pct >= 75) return '#27ae60';
+  if (pct >= 60) return '#f39c12';
+  return '#e74c3c';
+}
+
+function pctBar(pct) {
+  return '<div class="pct-bar"><div class="pct-fill" style="width:'+Math.min(pct,100)+'%;background:'+getPctColor(pct)+'"></div></div>';
+}
+
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.add('hidden'); });
+  document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.remove('active'); });
+  show(id);
+  // Find the button that activated this tab
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').indexOf("'"+id+"'") !== -1) {
+      btn.classList.add('active');
+    }
+  });
+  // Lazy-load content
+  var loaders = {
+    'att-tab': loadStudentAttendance,
+    'tt-tab': loadTimetable,
+    'materials-tab': loadMaterials,
+    'upload-doc-tab': renderUploadDocForm,
+    'cgpa-tab': renderCGPAForm,
+    'students-tab': loadAllStudents,
+    'attendance-tab': renderAttendanceAdmin,
+    'documents-tab': loadAllDocuments,
+    'upload-material-tab': renderUploadMaterialForm,
+    'results-tab': loadAllCGPA
+  };
+  if (loaders[id]) loaders[id]();
+}
+
+function openModal(title, html) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = html;
+  show('modal-overlay');
+}
+
+function closeModal() { hide('modal-overlay'); }
+
+// ============================================================
+// LOGIN
+// ============================================================
+function doLogin() {
+  var en = document.getElementById('enrollment-input').value.trim();
+  var pw = document.getElementById('password-input').value.trim();
+  clearAlert('login-alert');
+  if (!en || !pw) { showAlert('login-alert', 'Please enter Enrollment Number and Password.', 'warning'); return; }
+  var btn = document.getElementById('login-btn');
+  btn.textContent = '⏳ Checking...';
+  btn.disabled = true;
+  google.script.run.withSuccessHandler(function(res) {
+    btn.textContent = '🔐 Login';
+    btn.disabled = false;
+    if (res.success) {
+      showAlert('login-alert', res.message, 'success');
+      APP.user = res;
+      setTimeout(initDashboard, 500);
+    } else {
+      showAlert('login-alert', res.message, 'error');
+    }
+  }).withFailureHandler(function(err) {
+    btn.textContent = '🔐 Login';
+    btn.disabled = false;
+    showAlert('login-alert', 'Connection error: ' + err.message, 'error');
+  }).login(en, pw);
+}
+
+document.getElementById('password-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('enrollment-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('password-input').focus();
+});
+
+function doLogout() {
+  APP.user = null;
+  hide('dashboard-page');
+  show('login-page');
+  document.getElementById('enrollment-input').value = '';
+  document.getElementById('password-input').value = '';
+  clearAlert('login-alert');
+}
+
+// ============================================================
+// DASHBOARD INIT
+// ============================================================
+function initDashboard() {
+  hide('login-page');
+  show('dashboard-page');
+  document.getElementById('nav-name').textContent = APP.user.name;
+  document.getElementById('nav-role').textContent = APP.user.role === 'admin' ? '🛡️ Admin/Mentor' : '🎒 Student';
+  document.getElementById('welcome-text').textContent = 'Welcome, ' + APP.user.name + '! 👋';
+  document.getElementById('welcome-sub').textContent = APP.user.role === 'admin'
+    ? 'Admin Dashboard • Enrollment: ' + APP.user.enrollmentNumber
+    : 'Student Dashboard • Enrollment: ' + APP.user.enrollmentNumber;
+
+  if (APP.user.role === 'student') {
+    show('student-view');
+    hide('admin-view');
+    loadStudentStats();
+    loadStudentAttendance();
+  } else {
+    hide('student-view');
+    show('admin-view');
+    loadAllStudents();
+  }
+}
+
+// ============================================================
+// STUDENT: STATS
+// ============================================================
+function loadStudentStats() {
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('student-stats');
+    if (!res.success) { el.innerHTML = ''; return; }
+    var pct = parseFloat(res.percentage) || 0;
+    el.innerHTML =
+      '<div class="stat-card '+(pct>=75?'green':pct>=60?'orange':'red')+'"><div class="stat-num">'+pct+'%</div><div class="stat-label">Attendance</div></div>' +
+      '<div class="stat-card"><div class="stat-num">'+(res.present||0)+'</div><div class="stat-label">Classes Present</div></div>' +
+      '<div class="stat-card"><div class="stat-num">'+(res.totalClasses||0)+'</div><div class="stat-label">Total Classes</div></div>';
+  }).getStudentAttendance(APP.user.enrollmentNumber);
+}
+
+// ============================================================
+// STUDENT: ATTENDANCE TAB
+// ============================================================
+function loadStudentAttendance() {
+  loader('att-tab', 'Loading attendance...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('att-tab');
+    if (!res.success) { el.innerHTML = '<div class="alert alert-info">ℹ️ No attendance record found yet.</div>'; return; }
+    var pct = parseFloat(res.percentage) || 0;
+    var status = pct >= 75 ? '✅ Good Standing' : pct >= 60 ? '⚠️ Below Average' : '🚫 Critical – Below 60%';
+    el.innerHTML = '<h3 style="margin-bottom:16px">📊 My Attendance</h3>' +
+      '<div class="two-col">' +
+        '<div style="padding:16px;background:#f7f9ff;border-radius:12px">' +
+          '<div style="font-size:48px;font-weight:800;color:'+getPctColor(pct)+';text-align:center">'+pct+'%</div>' +
+          pctBar(pct) +
+          '<div style="text-align:center;margin-top:10px;font-weight:600">'+status+'</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:12px">' +
+          '<div class="stat-card" style="text-align:left"><div style="font-size:13px;color:#888">Classes Present</div><div style="font-size:24px;font-weight:700">'+(res.present||0)+'</div></div>' +
+          '<div class="stat-card" style="text-align:left"><div style="font-size:13px;color:#888">Total Classes</div><div style="font-size:24px;font-weight:700">'+(res.totalClasses||0)+'</div></div>' +
+          '<div class="stat-card" style="text-align:left"><div style="font-size:13px;color:#888">Absent</div><div style="font-size:24px;font-weight:700;color:#e74c3c">'+((res.totalClasses||0)-(res.present||0))+'</div></div>' +
+        '</div>' +
+      '</div>';
+  }).getStudentAttendance(APP.user.enrollmentNumber);
+}
+
+// ============================================================
+// STUDENT: TIMETABLE
+// ============================================================
+function loadTimetable() {
+  loader('tt-tab', 'Loading timetable...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('tt-tab');
+    if (!res.success) { el.innerHTML = '<div class="alert alert-error">'+res.message+'</div>'; return; }
+    var html = '<h3 style="margin-bottom:16px">📅 Class Timetable</h3>';
+    res.timetable.forEach(function(day) {
+      html += '<div class="tt-day"><div class="tt-day-header">'+day.day+'</div><div class="tt-periods">';
+      day.periods.forEach(function(p) {
+        html += '<div class="tt-period">'+p+'</div>';
+      });
+      html += '</div></div>';
+    });
+    el.innerHTML = html;
+  }).getTimetable();
+}
+
+// ============================================================
+// STUDENT: MATERIALS
+// ============================================================
+function loadMaterials() {
+  loader('materials-tab', 'Loading materials...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('materials-tab');
+    if (!res.success) { el.innerHTML = '<div class="alert alert-error">'+res.message+'</div>'; return; }
+    if (!res.materials.length) { el.innerHTML = '<h3>📚 Study Materials</h3><div class="alert alert-info" style="margin-top:16px">No materials uploaded yet.</div>'; return; }
+    var html = '<h3 style="margin-bottom:16px">📚 Study Materials</h3>';
+    res.materials.forEach(function(m) {
+      var ts = m['Timestamp'] || '';
+      var title = m['Title'] || 'Untitled';
+      var desc = m['Description'] || '';
+      var url = m['File URL'] || '';
+      var admin = m['Admin Name'] || '';
+      html += '<div style="border:1.5px solid #e8edf8;border-radius:12px;padding:16px;margin-bottom:12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">' +
+          '<div><div style="font-weight:700;font-size:15px">'+title+'</div>' +
+          '<div style="font-size:12px;color:#888;margin-top:3px">By '+admin+' • '+ts+'</div></div>' +
+          (url ? '<a class="btn btn-success btn-sm" href="'+url+'" target="_blank">⬇️ Download</a>' : '') +
+        '</div>' +
+        (desc ? '<p style="margin-top:10px;font-size:13px;color:#555">'+desc+'</p>' : '') +
+      '</div>';
+    });
+    el.innerHTML = html;
+  }).getMaterials();
+}
+
+// ============================================================
+// STUDENT: UPLOAD DOCUMENT
+// ============================================================
+function renderUploadDocForm() {
+  loader('upload-doc-tab', 'Loading admin list...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('upload-doc-tab');
+    var adminOpts = '';
+    if (res.success) {
+      res.admins.forEach(function(a) {
+        adminOpts += '<option value="'+a.name+' ('+a.enrollmentNumber+')">'+a.name+' ('+a.enrollmentNumber+')</option>';
+      });
+    }
+    el.innerHTML =
+      '<h3 style="margin-bottom:16px">📤 Upload Document to Admin</h3>' +
+      '<div id="doc-alert"></div>' +
+      '<div class="form-group"><label>Select Admin/Mentor</label><select id="doc-admin">'+adminOpts+'</select></div>' +
+      '<div class="form-group"><label>Description</label><textarea id="doc-desc" rows="3" placeholder="Describe your document..."></textarea></div>' +
+      '<div class="form-group"><label>Google Drive File URL</label><input type="url" id="doc-url" placeholder="https://drive.google.com/..."/></div>' +
+      '<button class="btn btn-primary btn-block" onclick="submitDocument()" id="doc-btn">📤 Upload Document</button>';
+  }).getAdminList();
+}
+
+function submitDocument() {
+  var admin = document.getElementById('doc-admin').value;
+  var desc = document.getElementById('doc-desc').value.trim();
+  var url = document.getElementById('doc-url').value.trim();
+  clearAlert('doc-alert');
+  if (!admin) { showAlert('doc-alert','Please select an admin.','warning'); return; }
+  if (!desc) { showAlert('doc-alert','Please enter a description.','warning'); return; }
+  if (!url) { showAlert('doc-alert','Please enter the file URL.','warning'); return; }
+  var btn = document.getElementById('doc-btn');
+  btn.textContent = '⏳ Uploading...';
+  btn.disabled = true;
+  google.script.run.withSuccessHandler(function(res) {
+    btn.textContent = '📤 Upload Document';
+    btn.disabled = false;
+    showAlert('doc-alert', res.success ? res.message : res.message, res.success ? 'success' : 'error');
+    if (res.success) { document.getElementById('doc-desc').value=''; document.getElementById('doc-url').value=''; }
+  }).uploadDocument(APP.user.name, APP.user.enrollmentNumber, admin, desc, url);
+}
+
+// ============================================================
+// STUDENT: CGPA
+// ============================================================
+function renderCGPAForm() {
+  loader('cgpa-tab', 'Loading CGPA...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('cgpa-tab');
+    var existing = '';
+    if (res.success && res.results.length) {
+      existing = '<h4 style="margin:16px 0 10px">My CGPA Records</h4><div class="table-wrap"><table><thead><tr><th>Semester</th><th>CGPA</th></tr></thead><tbody>';
+      res.results.sort(function(a,b){return a.semester-b.semester}).forEach(function(r){
+        existing += '<tr><td>Semester '+r.semester+'</td><td><span class="badge '+(r.cgpa>=8?'badge-green':r.cgpa>=6?'badge-orange':'badge-red')+'">'+r.cgpa+'</span></td></tr>';
+      });
+      existing += '</tbody></table></div>';
+    }
+    el.innerHTML =
+      '<h3 style="margin-bottom:16px">🎯 Upload CGPA</h3>' +
+      '<div id="cgpa-alert"></div>' +
+      '<div class="form-group"><label>Select Semester</label>' +
+        '<select id="cgpa-sem"><option value="">-- Select --</option>' +
+        [1,2,3,4,5,6].map(function(s){return '<option value="'+s+'">Semester '+s+'</option>'}).join('') +
+        '</select></div>' +
+      '<div class="form-group"><label>CGPA (0.00 – 10.00)</label><input type="number" id="cgpa-val" min="0" max="10" step="0.01" placeholder="e.g. 8.25"/></div>' +
+      '<button class="btn btn-primary btn-block" onclick="submitCGPA()" id="cgpa-btn">🎯 Save CGPA</button>' +
+      existing;
+  }).getStudentCGPA(APP.user.enrollmentNumber);
+}
+
+function submitCGPA() {
+  var sem = document.getElementById('cgpa-sem').value;
+  var val = document.getElementById('cgpa-val').value.trim();
+  clearAlert('cgpa-alert');
+  if (!sem) { showAlert('cgpa-alert','Please select semester.','warning'); return; }
+  if (!val || isNaN(val) || val < 0 || val > 10) { showAlert('cgpa-alert','Enter valid CGPA (0-10).','warning'); return; }
+  var btn = document.getElementById('cgpa-btn');
+  btn.textContent = '⏳ Saving...';
+  btn.disabled = true;
+  google.script.run.withSuccessHandler(function(res) {
+    btn.textContent = '🎯 Save CGPA';
+    btn.disabled = false;
+    showAlert('cgpa-alert', res.message, res.success ? 'success' : 'error');
+    if (res.success) renderCGPAForm();
+  }).uploadCGPA(APP.user.enrollmentNumber, APP.user.name, sem, parseFloat(val));
+}
+
+// ============================================================
+// ADMIN: ALL STUDENTS
+// ============================================================
+function loadAllStudents() {
+  loader('students-tab', 'Loading students...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('students-tab');
+    if (!res.success) { el.innerHTML = '<div class="alert alert-error">'+res.message+'</div>'; return; }
+    if (!res.students.length) { el.innerHTML = '<div class="alert alert-info">No students found.</div>'; return; }
+    var html = '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">' +
+      '<h3>👥 All Students ('+res.students.length+')</h3>' +
+      '<input style="width:200px;margin:0" type="text" id="student-search" placeholder="🔍 Search..." oninput="filterStudentTable()"/>' +
+      '</div>' +
+      '<div class="table-wrap"><table id="student-table">' +
+      '<thead><tr><th>#</th><th>Enrollment</th><th>Name</th><th>Present</th><th>Total</th><th>%</th></tr></thead><tbody>';
+    res.students.forEach(function(s, i) {
+      var pct = parseFloat(s.percentage) || 0;
+      html += '<tr>' +
+        '<td>'+(i+1)+'</td>' +
+        '<td><code>'+s.enrollmentNumber+'</code></td>' +
+        '<td>'+s.name+'</td>' +
+        '<td>'+s.present+'</td>' +
+        '<td>'+s.total+'</td>' +
+        '<td><span class="badge '+getPctClass(pct)+'">'+pct+'%</span>'+pctBar(pct)+'</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  }).getAllStudents();
+}
+
+function filterStudentTable() {
+  var val = document.getElementById('student-search').value.toLowerCase();
+  var rows = document.querySelectorAll('#student-table tbody tr');
+  rows.forEach(function(r) {
+    r.style.display = r.textContent.toLowerCase().includes(val) ? '' : 'none';
+  });
+}
+
+// ============================================================
+// ADMIN: ATTENDANCE MANAGEMENT
+// ============================================================
+function renderAttendanceAdmin() {
+  loader('attendance-tab', 'Loading...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('attendance-tab');
+    if (!res.success) { el.innerHTML = '<div class="alert alert-error">'+res.message+'</div>'; return; }
+    if (!res.students.length) { el.innerHTML = '<div class="alert alert-info">No students found.</div>'; return; }
+
+    var html = '<h3 style="margin-bottom:12px">📊 Manage Attendance</h3>' +
+      '<div id="att-admin-alert"></div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">' +
+        '<input style="width:140px;margin:0" type="number" id="pct-filter" placeholder="Filter % below" min="0" max="100"/>' +
+        '<button class="btn btn-outline btn-sm" onclick="filterByPct()">🔽 Filter</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="resetFilter()">🔄 Show All</button>' +
+        '<button class="btn btn-success btn-sm" onclick="saveAllAttendance()">💾 Save All</button>' +
+      '</div>' +
+      '<div class="table-wrap"><table id="att-admin-table"><thead><tr><th>#</th><th>Enrollment</th><th>Name</th><th>Total</th><th>Present</th><th>%</th></tr></thead><tbody>';
+    res.students.forEach(function(s, i) {
+      var pct = parseFloat(s.percentage) || 0;
+      html += '<tr data-pct="'+pct+'" data-en="'+s.enrollmentNumber+'" data-name="'+s.name+'">' +
+        '<td>'+(i+1)+'</td>' +
+        '<td><code>'+s.enrollmentNumber+'</code></td>' +
+        '<td>'+s.name+'</td>' +
+        '<td><input type="number" class="total-cls" min="0" value="'+(s.total||0)+'" style="width:70px;margin:0;padding:6px"/></td>' +
+        '<td><input type="number" class="present-cls" min="0" value="'+(s.present||0)+'" style="width:70px;margin:0;padding:6px" oninput="calcRowPct(this)"/></td>' +
+        '<td><span class="pct-disp badge '+getPctClass(pct)+'">'+pct+'%</span></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  }).getAllStudents();
+}
+
+function calcRowPct(el) {
+  var row = el.closest('tr');
+  var total = parseFloat(row.querySelector('.total-cls').value) || 0;
+  var present = parseFloat(el.value) || 0;
+  var pct = total > 0 ? ((present/total)*100).toFixed(2) : 0;
+  row.setAttribute('data-pct', pct);
+  var disp = row.querySelector('.pct-disp');
+  disp.textContent = pct + '%';
+  disp.className = 'pct-disp badge ' + getPctClass(pct);
+}
+
+function filterByPct() {
+  var threshold = parseFloat(document.getElementById('pct-filter').value) || 75;
+  document.querySelectorAll('#att-admin-table tbody tr').forEach(function(r) {
+    r.style.display = parseFloat(r.getAttribute('data-pct')) < threshold ? '' : 'none';
+  });
+}
+
+function resetFilter() {
+  document.getElementById('pct-filter').value = '';
+  document.querySelectorAll('#att-admin-table tbody tr').forEach(function(r) { r.style.display = ''; });
+}
+
+function saveAllAttendance() {
+  var rows = document.querySelectorAll('#att-admin-table tbody tr');
+  var updates = [];
+  rows.forEach(function(r) {
+    if (r.style.display === 'none') return;
+    updates.push({
+      enrollmentNumber: r.getAttribute('data-en'),
+      name: r.getAttribute('data-name'),
+      totalClasses: parseFloat(r.querySelector('.total-cls').value) || 0,
+      present: parseFloat(r.querySelector('.present-cls').value) || 0
+    });
+  });
+  if (!updates.length) return;
+  showAlert('att-admin-alert','Saving...','info');
+  google.script.run.withSuccessHandler(function(res) {
+    showAlert('att-admin-alert', res.success ? '✅ Attendance saved successfully!' : res.message, res.success ? 'success' : 'error');
+  }).bulkUpdateAttendance(updates);
+}
+
+// ============================================================
+// ADMIN: DOCUMENTS
+// ============================================================
+function loadAllDocuments() {
+  loader('documents-tab', 'Loading documents...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('documents-tab');
+    if (!res.success) { el.innerHTML = '<div class="alert alert-error">'+res.message+'</div>'; return; }
+    if (!res.documents.length) { el.innerHTML = '<h3>📁 Student Documents</h3><div class="alert alert-info" style="margin-top:16px">No documents uploaded yet.</div>'; return; }
+    var html = '<h3 style="margin-bottom:16px">📁 Student Documents ('+res.documents.length+')</h3>' +
+      '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Student</th><th>Enrollment</th><th>Admin</th><th>Description</th><th>File</th></tr></thead><tbody>';
+    res.documents.forEach(function(d) {
+      html += '<tr>' +
+        '<td style="white-space:nowrap;font-size:11px">'+d['Timestamp']+'</td>' +
+        '<td>'+d['Student Name']+'</td>' +
+        '<td><code>'+d['Enrollment Number']+'</code></td>' +
+        '<td>'+d['Selected Admin']+'</td>' +
+        '<td style="max-width:160px">'+d['Description']+'</td>' +
+        '<td>'+(d['File URL'] ? '<a class="btn btn-primary btn-sm" href="'+d['File URL']+'" target="_blank">📥 Open</a>' : '—')+'</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  }).getAllDocuments();
+}
+
+// ============================================================
+// ADMIN: UPLOAD MATERIAL
+// ============================================================
+function renderUploadMaterialForm() {
+  var el = document.getElementById('upload-material-tab');
+  el.innerHTML =
+    '<h3 style="margin-bottom:16px">📤 Upload Study Material</h3>' +
+    '<div id="mat-alert"></div>' +
+    '<div class="form-group"><label>Title</label><input type="text" id="mat-title" placeholder="e.g. Chapter 3 Notes"/></div>' +
+    '<div class="form-group"><label>Description</label><textarea id="mat-desc" rows="3" placeholder="Brief description..."></textarea></div>' +
+    '<div class="form-group"><label>Google Drive File URL</label><input type="url" id="mat-url" placeholder="https://drive.google.com/..."/></div>' +
+    '<button class="btn btn-primary btn-block" onclick="submitMaterial()" id="mat-btn">📤 Upload Material</button>';
+}
+
+function submitMaterial() {
+  var title = document.getElementById('mat-title').value.trim();
+  var desc = document.getElementById('mat-desc').value.trim();
+  var url = document.getElementById('mat-url').value.trim();
+  clearAlert('mat-alert');
+  if (!title) { showAlert('mat-alert','Please enter a title.','warning'); return; }
+  if (!url) { showAlert('mat-alert','Please enter the file URL.','warning'); return; }
+  var btn = document.getElementById('mat-btn');
+  btn.textContent = '⏳ Uploading...';
+  btn.disabled = true;
+  google.script.run.withSuccessHandler(function(res) {
+    btn.textContent = '📤 Upload Material';
+    btn.disabled = false;
+    showAlert('mat-alert', res.message, res.success ? 'success' : 'error');
+    if (res.success) { document.getElementById('mat-title').value=''; document.getElementById('mat-desc').value=''; document.getElementById('mat-url').value=''; }
+  }).uploadMaterial(APP.user.name, title, desc, url);
+}
+
+// ============================================================
+// ADMIN: ALL CGPA
+// ============================================================
+function loadAllCGPA() {
+  loader('results-tab', 'Loading CGPA records...');
+  google.script.run.withSuccessHandler(function(res) {
+    var el = document.getElementById('results-tab');
+    if (!res.success) { el.innerHTML = '<div class="alert alert-error">'+res.message+'</div>'; return; }
+    if (!res.results.length) { el.innerHTML = '<h3>🎯 CGPA Records</h3><div class="alert alert-info" style="margin-top:16px">No CGPA records yet.</div>'; return; }
+    var html = '<h3 style="margin-bottom:16px">🎯 CGPA Records ('+res.results.length+')</h3>' +
+      '<div class="table-wrap"><table><thead><tr><th>Enrollment</th><th>Name</th><th>Semester</th><th>CGPA</th></tr></thead><tbody>';
+    res.results.forEach(function(r) {
+      var cgpa = parseFloat(r['CGPA']) || 0;
+      html += '<tr>' +
+        '<td><code>'+r['Enrollment Number']+'</code></td>' +
+        '<td>'+r['Name']+'</td>' +
+        '<td>Sem '+r['Semester']+'</td>' +
+        '<td><span class="badge '+(cgpa>=8?'badge-green':cgpa>=6?'badge-orange':'badge-red')+'">'+cgpa+'</span></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  }).getAllCGPA();
+}
+
+// ============================================================
+// CLOSE MODAL ON OVERLAY CLICK
+// ============================================================
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
